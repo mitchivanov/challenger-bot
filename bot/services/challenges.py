@@ -141,25 +141,35 @@ async def create_report(
             # Затем загружаем фотографии
             if photos and bot:
                 logger.info(f"Uploading {len(photos)} photos for report {report['id']}")
-                for photo_id in photos:
+                
+                # Создаём FormData со всеми фотографиями
+                data = aiohttp.FormData()
+                
+                # Скачиваем все фото и добавляем в FormData
+                for i, photo_id in enumerate(photos):
                     # Скачиваем файл через aiogram
                     photo_bytes = await bot.download(photo_id)
                     photo_bytes.seek(0)
-                    data = aiohttp.FormData()
+                    
+                    # Добавляем каждое фото в FormData
                     data.add_field(
                         'photos',
                         photo_bytes,
-                        filename=f"{photo_id}.jpg",
+                        filename=f"photo_{i}_{photo_id}.jpg",
                         content_type='image/jpeg'
                     )
-                    async with session.post(
-                        f"{BACKEND_URL}/reports/{report['id']}/photos",
-                        data=data
-                    ) as photo_response:
-                        if photo_response.status != 200:
-                            logger.warning(f"Failed to upload photo {photo_id}: {photo_response.status}")
-                            continue
-                        logger.info(f"Photo {photo_id} uploaded successfully")
+                
+                # Отправляем все фото одним запросом
+                async with session.post(
+                    f"{BACKEND_URL}/reports/{report['id']}/photos",
+                    data=data
+                ) as photo_response:
+                    if photo_response.status != 200:
+                        error_text = await photo_response.text()
+                        logger.warning(f"Failed to upload photos: {photo_response.status} - {error_text}")
+                    else:
+                        logger.info(f"All {len(photos)} photos uploaded successfully")
+                        
             return report
 
 async def get_user_reports(user_id: int) -> List[dict]:
