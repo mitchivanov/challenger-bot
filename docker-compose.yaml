@@ -78,4 +78,4 @@ networks:
 volumes:
   postgres_data:
   uploads_data:
-  libertylib_frontend_static:
+  frontend_static:
