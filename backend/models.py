@@ -33,15 +33,15 @@ class Challenge(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    events = relationship("Event", back_populates="challenge")
-    participants = relationship("ChallengeParticipant", back_populates="challenge")
-    reports = relationship("UserReport", back_populates="challenge")
+    events = relationship("Event", back_populates="challenge", cascade="all, delete-orphan")
+    participants = relationship("ChallengeParticipant", back_populates="challenge", cascade="all, delete-orphan")
+    reports = relationship("UserReport", back_populates="challenge", cascade="all, delete-orphan")
 
 class Event(Base):
     __tablename__ = "events"
     
     id = Column(Integer, primary_key=True, nullable=False)
-    challenge_id = Column(Integer, ForeignKey("challenges.id"), nullable=False)
+    challenge_id = Column(Integer, ForeignKey("challenges.id", ondelete="CASCADE"), nullable=False)
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
     date = Column(DateTime, nullable=False)
@@ -52,14 +52,14 @@ class Event(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     challenge = relationship("Challenge", back_populates="events")
-    reports = relationship("UserReport", back_populates="event")
+    reports = relationship("UserReport", back_populates="event", cascade="all, delete-orphan")
 
 class ChallengeParticipant(Base):
     __tablename__ = "challenge_participants"
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    challenge_id = Column(Integer, ForeignKey("challenges.id"), nullable=False)
+    challenge_id = Column(Integer, ForeignKey("challenges.id", ondelete="CASCADE"), nullable=False)
     joined_at = Column(DateTime, default=datetime.utcnow)
     points = Column(Integer, default=0)
 
@@ -71,8 +71,8 @@ class UserReport(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    challenge_id = Column(Integer, ForeignKey("challenges.id"), nullable=True)
-    event_id = Column(Integer, ForeignKey("events.id"), nullable=True)
+    challenge_id = Column(Integer, ForeignKey("challenges.id", ondelete="CASCADE"), nullable=True)
+    event_id = Column(Integer, ForeignKey("events.id", ondelete="CASCADE"), nullable=True)
     text_content = Column(Text, nullable=False)
     report_date = Column(Date, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -89,7 +89,7 @@ class ReportPhoto(Base):
     __tablename__ = "report_photos"
 
     id = Column(Integer, primary_key=True, index=True)
-    report_id = Column(Integer, ForeignKey("user_reports.id"), nullable=False)
+    report_id = Column(Integer, ForeignKey("user_reports.id", ondelete="CASCADE"), nullable=False)
     photo_url = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 

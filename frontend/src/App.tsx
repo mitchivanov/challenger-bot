@@ -6,6 +6,8 @@ import './App.css'
 import EventsModal from './components/EventsModal'
 import ReportsModal from './components/ReportsModal'
 import { useChallenges } from './hooks/useApi'
+import { AuthProvider, useAuth } from './hooks/useAuth'
+import LoginForm from './components/LoginForm'
 
 const { Header, Content } = Layout
 const { TabPane } = Tabs
@@ -35,7 +37,7 @@ interface Event {
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8005'
 
-function App() {
+function AppContent() {
   const [challenges, setChallenges] = useState<Challenge[]>([])
   const [events, setEvents] = useState<Event[]>([])
   const [isModalVisible, setIsModalVisible] = useState(false)
@@ -269,4 +271,18 @@ function App() {
   )
 }
 
-export default App
+function App() {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) return null;
+  if (!isAuthenticated) return <LoginForm />;
+  return <AppContent />;
+}
+
+export default function AppWithProvider() {
+  return (
+    <AuthProvider>
+      <App />
+    </AuthProvider>
+  );
+}
