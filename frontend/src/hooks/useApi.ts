@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import type { Challenge, Event, Report } from '../types';
 
+const VITE_API_URL = 'https://libertylib.online/api'
+
 export const useChallenges = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -20,19 +22,19 @@ export const useChallenges = () => {
     };
 
     const getChallenges = () => handleRequest(async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/challenges/`);
+        const response = await fetch(`${VITE_API_URL}/challenges/`);
         if (!response.ok) throw new Error('Ошибка при получении челленджей');
         return response.json();
     });
 
     const getChallenge = (id: number) => handleRequest(async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/challenges/${id}`);
+        const response = await fetch(`${VITE_API_URL}/challenges/${id}`);
         if (!response.ok) throw new Error('Ошибка при получении челленджа');
         return response.json();
     });
 
     const createChallenge = (data: Omit<Challenge, 'id'>) => handleRequest(async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/challenges/`, {
+        const response = await fetch(`${VITE_API_URL}/challenges/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -42,7 +44,7 @@ export const useChallenges = () => {
     });
 
     const updateChallenge = (id: number, data: Partial<Challenge>) => handleRequest(async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/challenges/${id}`, {
+        const response = await fetch(`${VITE_API_URL}/challenges/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -52,14 +54,14 @@ export const useChallenges = () => {
     });
 
     const deleteChallenge = (id: number) => handleRequest(async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/challenges/${id}`, {
+        const response = await fetch(`${VITE_API_URL}/challenges/${id}`, {
             method: 'DELETE',
         });
         if (!response.ok) throw new Error('Ошибка при удалении челленджа');
     });
 
     const getChallengeEvents = (challengeId: number) => handleRequest(async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/challenges/${challengeId}/events`);
+        const response = await fetch(`${VITE_API_URL}/challenges/${challengeId}/events`);
         if (!response.ok) throw new Error('Ошибка при получении мероприятий');
         return response.json();
     });
@@ -72,7 +74,7 @@ export const useChallenges = () => {
         points_per_report: number;
         required_photos: number;
     }) => handleRequest(async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/events/`, {
+        const response = await fetch(`${VITE_API_URL}/events/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(eventData),
@@ -82,7 +84,7 @@ export const useChallenges = () => {
     });
 
     const updateEvent = (id: number, data: Partial<Event>) => handleRequest(async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/events/${id}`, {
+        const response = await fetch(`${VITE_API_URL}/events/${id}`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data),
@@ -92,20 +94,20 @@ export const useChallenges = () => {
     });
 
     const deleteEvent = (id: number) => handleRequest(async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/events/${id}`, {
+        const response = await fetch(`${VITE_API_URL}/events/${id}`, {
             method: 'DELETE',
         });
         if (!response.ok) throw new Error('Ошибка при удалении мероприятия');
     });
 
     const getChallengeReports = (challengeId: number) => handleRequest(async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/reports/challenge/${challengeId}`);
+        const response = await fetch(`${VITE_API_URL}/reports/challenge/${challengeId}`);
         if (!response.ok) throw new Error('Ошибка при получении отчетов');
         return response.json();
     });
 
     const getUserReports = (userId: number) => handleRequest(async () => {
-        const response = await fetch(`${import.meta.env.VITE_API_URL}/reports/user/${userId}`);
+        const response = await fetch(`${VITE_API_URL}/reports/user/${userId}`);
         if (!response.ok) throw new Error('Ошибка при получении отчетов пользователя');
         return response.json();
     });
@@ -115,7 +117,7 @@ export const useChallenges = () => {
         setError(null);
         try {
             console.log(`Rejecting report ${reportId}...`);
-            const response = await fetch(`${import.meta.env.VITE_API_URL}/reports/${reportId}`, {
+            const response = await fetch(`${VITE_API_URL}/reports/${reportId}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ rejected: true }),
