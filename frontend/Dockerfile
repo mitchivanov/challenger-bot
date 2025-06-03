@@ -1,17 +1,25 @@
-FROM node:18-alpine
+# Этап сборки
+FROM node:20-alpine as builder
 
 WORKDIR /app
 
-COPY frontend/package*.json ./
+# Копирование файлов package.json и package-lock.json
+COPY package*.json ./
 
-RUN npm install
+# Установка зависимостей
+RUN npm ci
 
-COPY frontend/ .
+# Копирование исходного кода
+COPY . .
 
-# Собираем production build
+# Сборка приложения
 RUN npm run build
 
-EXPOSE 3000
+# Этап production - копируем в volume для nginx
+FROM alpine:latest
 
-# Добавляем скрипт для копирования статики в volume и запуска dev сервера
-CMD sh -c "cp -r /app/dist/* /app/dist/. 2>/dev/null || true && npm run dev" 
+# Копирование собранного приложения в nginx volume
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+# Контейнер завершается после копирования файлов
+CMD ["echo", "Frontend static files copied to volume"] 

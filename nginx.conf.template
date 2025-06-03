@@ -14,7 +14,7 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/libertylib.online/privkey.pem;
 
     # Статические файлы из Docker volume
-    root /var/lib/docker/volumes/libertylib_frontend_static/_data;
+    root /var/lib/docker/volumes/challenger-bot_frontend_static/_data;
     index index.html index.htm;
 
     location / {
