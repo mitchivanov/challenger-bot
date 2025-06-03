@@ -26,10 +26,10 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=https://libertylib.online/api
     volumes:
       - frontend_static:/usr/share/nginx/html
-    environment:
-      - VITE_API_URL=/api
     depends_on:
       - backend
     networks:
