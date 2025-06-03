@@ -1,0 +1,40 @@
+# HTTP -> HTTPS редирект
+server {
+    listen 80;
+    server_name libertylib.online;
+    return 301 https://$host$request_uri;
+}
+
+# Frontend + API
+server {
+    listen 443 ssl;
+    server_name libertylib.online;
+
+    ssl_certificate /etc/letsencrypt/live/libertylib.online/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/libertylib.online/privkey.pem;
+
+    # Статические файлы из Docker volume
+    root /var/lib/docker/volumes/libertylib_frontend_static/_data;
+    index index.html index.htm;
+
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # API proxy
+    location /api/ {
+        proxy_pass http://backend:8000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Uploads (если нужно отдавать напрямую)
+    location /uploads/ {
+        alias /app/uploads/;
+    }
+
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+} 

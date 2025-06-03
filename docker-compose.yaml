@@ -1,33 +1,45 @@
 version: '3.8'
 
 services:
-  api:
+  backend:
     build: 
       context: .
       dockerfile: backend/Dockerfile
+    expose:
+      - "8000"
     ports:
-      - "8005:8000"
+      - "8002:8000"
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/challenger_db
+      - UPLOAD_DIR=/app/uploads
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - ./backend:/app/backend
+      - uploads_data:/app/uploads
     command: uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+    networks:
+      - app-network
 
   frontend:
     build:
       context: .
       dockerfile: frontend/Dockerfile
+    expose:
+      - "3000"
     ports:
-      - "3000:3000"
+      - "3002:3000"
     volumes:
       - ./frontend:/app
       - /app/node_modules
+      - libertylib_frontend_static:/app/dist
     environment:
-      - VITE_API_URL=http://localhost:8005
+      - VITE_API_URL=/api
     depends_on:
-      - api
+      - backend
+    networks:
+      - app-network
 
   db:
     image: postgres:15
@@ -37,6 +49,33 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=challenger_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    working_dir: /app
+    volumes:
+      - ./bot:/app
+    env_file: .env
+    depends_on:
+      - backend
+    command: python main.py
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
 
 volumes:
   postgres_data:
+  uploads_data:
+  libertylib_frontend_static:
