@@ -33,7 +33,7 @@ services:
     volumes:
       - ./frontend:/app
       - /app/node_modules
-      - libertylib_frontend_static:/app/dist
+      - frontend_static:/usr/share/nginx/html
     environment:
       - VITE_API_URL=/api
     depends_on:
